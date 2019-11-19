@@ -29,7 +29,7 @@ module.exports.cate = () => db('categories')
 function addTab(tab){
     return db('tabs').insert(tab)
     .then(() => module.exports.getUserTabs(tab.user_id))
-}
+};
 
 
 
