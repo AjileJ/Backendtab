@@ -1,6 +1,8 @@
 const router = require('express').Router();
 const tabsModel = require('./tabs-model');
 
+const knex = require('../database/dbConfig');
+
 router.get('/categories', (req,res) => {
   tabsModel.cate()
     .then(cate => {
@@ -20,26 +22,45 @@ router.get('/:id',(req,res) => {
     res.status(200).json({tabs})
   })
   .catch(err => {
+    console.log(err)
     res.status(500).json({error: "error getting user tabs"})
   })
 })
 
+
 router.post('/:id', (req,res) => {
   tabsModel.addTab({...req.body, user_id: req.params.id})
-  .then(tabs => res.json({tabs}))
-  .catch(err => res.status(500).json({error: "error while creating user"}))
-})
-
-router.put('/:id/:tab_id', (req,res) => {
-  tabsModel.updateTab({...req.body, user_id: req.params.id})
   .then(tabs => {
     res.json({tabs})
   })
   .catch(err => {
-    console.log(err);
-    res.status(500).json({error: "could not update user tabs"})
+    console.log(err)
+    res.status(500).json({error: "error while creating tab"})
   })
 })
+
+router.put('/:id/:tab_id', (req,res) => {
+  const category = req.body.category;
+  delete req.body['category'] 
+  tabsModel.updateTab(req.body, req.params.tab_id)
+  .then(count => {
+    res.status(200).json(count)
+  })
+  .catch(err => {
+    console.log(err)
+    res.status(500).json({error: "failed to insert tab"})
+  })
+})
+
+router.delete('/:id/:tab_id', (req,res) => {
+  tabsModel.deleteTab(req.params.id, req.params.tab_id)
+  .then(tabs => res.json({tabs}
+    ))
+    .catch(err => {
+      res.status(500).json({error: "could not delete tab"})
+  })
+})
+
 
 function confirmUser(req,res,next) {
   const {id} = req.params;
